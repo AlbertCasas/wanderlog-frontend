@@ -1,0 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --font-sans: 'Poppins', system-ui, sans-serif;
+  --color-bg: #FBF7EF;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #F3EDE0;
+  --color-border: #E8E1D3;
+  --color-border-strong: #D8CFBC;
+  --color-text: #2B3A4A;
+  --color-text-secondary: #6B7785;
+  --color-text-muted: #8A95A5;
+  --color-blue: #2B6CB0;
+  --color-blue-bg: rgba(43, 108, 176, 0.08);
+  --color-orange: #F0923B;
+  --color-orange-bg: rgba(240, 146, 59, 0.1);
+  --color-danger: #E0563F;
+  --color-danger-bg: rgba(224, 86, 63, 0.08);
+  --radius: 14px;
+  --radius-lg: 20px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 16px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+input, textarea {
+  font-family: var(--font-sans);
+}
+
+:root {
+  --dp-font-family: var(--font-sans);
+  --dp-background-color: var(--color-surface);
+  --dp-text-color: var(--color-text);
+  --dp-hover-color: var(--color-bg);
+  --dp-hover-text-color: var(--color-text);
+  --dp-primary-color: var(--color-blue);
+  --dp-primary-text-color: #FFFFFF;
+  --dp-secondary-color: var(--color-text-secondary);
+  --dp-border-color: var(--color-border);
+  --dp-menu-border-color: var(--color-border);
+  --dp-border-color-hover: var(--color-blue);
+  --dp-icon-color: var(--color-blue);
+}
+
+.dp--input_wrap input.dp--input,
+input.dp--input {
+  border-radius: var(--radius) !important;
+  border: 2px solid var(--color-border) !important;
+  background: var(--color-bg) !important;
+}
+
+.dp--menu {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 2px solid var(--color-blue) !important;
+}
+
+.dp--calendar-header-item {
+  color: var(--color-text-secondary) !important;
+  font-weight: 600 !important;
+}
+
+.dp--action-row {
+  background: var(--color-surface) !important;
+}
+
+.dp--action-row button.dp--action-select {
+  background: var(--color-orange) !important;
+  border-color: var(--color-orange) !important;
+  border-radius: var(--radius) !important;
+}
+
+.dp--action-row button.dp--action-cancel {
+  border-radius: var(--radius) !important;
+  border-color: var(--color-border-strong) !important;
+  color: var(--color-text-secondary) !important;
+}
