@@ -1,53 +1,60 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { getTrip, updateTrip, deleteTrip } from '../services/trips'
-import type { Trip } from '../types'
-import AppHeader from '../components/AppHeader.vue'
-import TripFormModal from '../components/TripFormModal.vue'
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { getTrip, updateTrip, deleteTrip } from "../services/trips";
+import type { Trip } from "../types";
+import AppHeader from "../components/AppHeader.vue";
+import TripFormModal from "../components/TripFormModal.vue";
+import DestinationList from "../components/DestinationList.vue";
+import TripMap from "../components/TripMap.vue";
+import ExpenseList from '../components/ExpenseList.vue'
 
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
 
-const trip = ref<Trip | null>(null)
-const loading = ref(true)
-const showEditModal = ref(false)
-const showDeleteConfirm = ref(false)
-const saving = ref(false)
-const deleting = ref(false)
+const trip = ref<Trip | null>(null);
+const loading = ref(true);
+const showEditModal = ref(false);
+const showDeleteConfirm = ref(false);
+const saving = ref(false);
+const deleting = ref(false);
 
 async function loadTrip() {
-  loading.value = true
-  trip.value = await getTrip(Number(route.params.id))
-  loading.value = false
+  loading.value = true;
+  trip.value = await getTrip(Number(route.params.id));
+  loading.value = false;
 }
 
 async function handleUpdate(data: any) {
-  saving.value = true
+  saving.value = true;
   try {
-    await updateTrip(Number(route.params.id), data)
-    showEditModal.value = false
-    await loadTrip()
+    await updateTrip(Number(route.params.id), data);
+    showEditModal.value = false;
+    await loadTrip();
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
 async function handleDelete() {
-  deleting.value = true
+  deleting.value = true;
   try {
-    await deleteTrip(Number(route.params.id))
-    router.push('/trips')
+    await deleteTrip(Number(route.params.id));
+    router.push("/trips");
   } finally {
-    deleting.value = false
+    deleting.value = false;
   }
 }
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-onMounted(loadTrip)
+onMounted(loadTrip);
 </script>
 
 <template>
@@ -63,11 +70,12 @@ onMounted(loadTrip)
           <div>
             <span class="emoji">✈️</span>
             <h1>{{ trip.title }}</h1>
-            <p class="destination">{{ trip.destination }}</p>
           </div>
           <div class="header-actions">
             <button class="edit-btn" @click="showEditModal = true">Edit</button>
-            <button class="delete-btn" @click="showDeleteConfirm = true">Delete</button>
+            <button class="delete-btn" @click="showDeleteConfirm = true">
+              Delete
+            </button>
           </div>
         </div>
 
@@ -83,9 +91,13 @@ onMounted(loadTrip)
         </div>
 
         <div v-if="trip.description" class="description">
-          <h2>About this trip</h2>
           <p>{{ trip.description }}</p>
         </div>
+
+        <TripMap :trips="[trip]" class="trip-map" />
+
+        <DestinationList :trip="trip" @updated="loadTrip" />
+        <ExpenseList :trip-id="trip.id" />
       </div>
     </main>
 
@@ -95,16 +107,27 @@ onMounted(loadTrip)
       :loading="saving"
       @close="showEditModal = false"
       @submit="handleUpdate"
+      @updated="loadTrip"
     />
 
-    <div v-if="showDeleteConfirm" class="overlay" @click.self="showDeleteConfirm = false">
+    <div
+      v-if="showDeleteConfirm"
+      class="overlay"
+      @click.self="showDeleteConfirm = false"
+    >
       <div class="confirm-modal">
         <h2>Delete this trip?</h2>
         <p>This action cannot be undone.</p>
         <div class="confirm-actions">
-          <button class="cancel-btn" @click="showDeleteConfirm = false">Cancel</button>
-          <button class="confirm-delete-btn" :disabled="deleting" @click="handleDelete">
-            {{ deleting ? 'Deleting...' : 'Delete trip' }}
+          <button class="cancel-btn" @click="showDeleteConfirm = false">
+            Cancel
+          </button>
+          <button
+            class="confirm-delete-btn"
+            :disabled="deleting"
+            @click="handleDelete"
+          >
+            {{ deleting ? "Deleting..." : "Delete trip" }}
           </button>
         </div>
       </div>
@@ -159,12 +182,6 @@ onMounted(loadTrip)
 h1 {
   font-size: 24px;
   font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.destination {
-  font-size: 14px;
-  color: var(--color-text-secondary);
 }
 
 .header-actions {
@@ -172,7 +189,8 @@ h1 {
   gap: 8px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn,
+.delete-btn {
   font-size: 13px;
   font-weight: 500;
   padding: 8px 16px;
@@ -216,16 +234,15 @@ h1 {
   font-weight: 500;
 }
 
-.description h2 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.description p {
+.description {
+  margin-bottom: 1.75rem;
   font-size: 14px;
   color: var(--color-text-secondary);
   line-height: 1.7;
+}
+
+.trip-map {
+  margin-bottom: 0;
 }
 
 .overlay {
@@ -279,7 +296,7 @@ h1 {
 .confirm-delete-btn {
   flex: 1;
   background: var(--color-danger);
-  color: #FFFFFF;
+  color: #ffffff;
   font-size: 14px;
   font-weight: 600;
   padding: 11px;

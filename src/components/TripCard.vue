@@ -14,9 +14,15 @@ function formatDate(dateStr: string) {
   <RouterLink :to="`/trips/${trip.id}`" class="trip-card">
     <div class="card-top">
       <span class="emoji">✈️</span>
+      <span v-if="trip.destinations.length > 0" class="dest-count">
+        {{ trip.destinations.length }} {{ trip.destinations.length === 1 ? 'destination' : 'destinations' }}
+      </span>
     </div>
     <h3>{{ trip.title }}</h3>
-    <p class="destination">{{ trip.destination }}</p>
+    <p v-if="trip.destinations.length > 0" class="destinations-preview">
+      {{ trip.destinations.map(d => d.name).join(' → ') }}
+    </p>
+    <p v-else class="no-destinations">No destinations yet</p>
     <p class="dates">{{ formatDate(trip.start_date) }} – {{ formatDate(trip.end_date) }}</p>
   </RouterLink>
 </template>
@@ -37,11 +43,23 @@ function formatDate(dateStr: string) {
 }
 
 .card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 0.75rem;
 }
 
 .emoji {
   font-size: 28px;
+}
+
+.dest-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-blue);
+  background: var(--color-blue-bg);
+  border-radius: 20px;
+  padding: 3px 10px;
 }
 
 h3 {
@@ -50,9 +68,18 @@ h3 {
   margin-bottom: 4px;
 }
 
-.destination {
-  font-size: 14px;
+.destinations-preview {
+  font-size: 13px;
   color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.no-destinations {
+  font-size: 13px;
+  color: var(--color-text-muted);
   margin-bottom: 6px;
 }
 

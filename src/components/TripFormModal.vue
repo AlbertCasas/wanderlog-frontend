@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import { VueDatePicker } from "@vuepic/vue-datepicker";
+import { ref, onMounted, computed, watch } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
 import FormField from "./FormField.vue";
+import DestinationList from "./DestinationList.vue";
 import type { Trip } from "../types";
 
 const props = defineProps<{
   loading?: boolean;
   trip?: Trip | null;
+  createdTrip?: Trip | null;
 }>();
 
 const emit = defineEmits<{
@@ -14,30 +16,40 @@ const emit = defineEmits<{
   submit: [
     data: {
       title: string;
-      destination: string;
       start_date: string;
       end_date: string;
       description: string;
     },
   ];
+  updated: [];
 }>();
 
 const title = ref("");
-const destination = ref("");
 const startDate = ref<Date | null>(null);
 const endDate = ref<Date | null>(null);
 const description = ref("");
 const dateError = ref("");
+const step = ref(1);
+
+const isEditing = computed(() => !!props.trip);
 
 onMounted(() => {
   if (props.trip) {
     title.value = props.trip.title;
-    destination.value = props.trip.destination;
     startDate.value = new Date(props.trip.start_date);
     endDate.value = new Date(props.trip.end_date);
     description.value = props.trip.description || "";
   }
 });
+
+watch(
+  () => props.createdTrip,
+  (val) => {
+    if (val) {
+      step.value = 2;
+    }
+  },
+);
 
 function toIsoDate(date: Date) {
   return date.toISOString().split("T")[0];
@@ -55,7 +67,6 @@ function handleSubmit() {
   }
   emit("submit", {
     title: title.value,
-    destination: destination.value,
     start_date: toIsoDate(startDate.value),
     end_date: toIsoDate(endDate.value),
     description: description.value,
@@ -66,10 +77,32 @@ function handleSubmit() {
 <template>
   <div class="overlay" @click.self="$emit('close')">
     <div class="modal">
-      <h2>{{ trip ? "Edit trip" : "New trip" }}</h2>
-      <form @submit.prevent="handleSubmit">
+      <div class="modal-header">
+        <div class="header-left">
+          <h2>
+            {{
+              isEditing
+                ? "Edit trip"
+                : step === 1
+                  ? "New trip"
+                  : "Add destinations"
+            }}
+          </h2>
+          <div v-if="!isEditing" class="steps">
+            <span :class="['step', step === 1 ? 'active' : 'done']">1</span>
+            <div class="step-line"></div>
+            <span :class="['step', step === 2 ? 'active' : '']">2</span>
+          </div>
+        </div>
+        <button class="close-btn" @click="$emit('close')">✕</button>
+      </div>
+
+      <!-- Step 1: Trip info -->
+      <form
+        v-if="step === 1 || isEditing"
+        @submit.prevent="handleSubmit"
+      >
         <FormField v-model="title" label="Trip title" />
-        <FormField v-model="destination" label="Destination" />
 
         <div class="row">
           <div class="field">
@@ -77,7 +110,9 @@ function handleSubmit() {
             <VueDatePicker
               v-model="startDate"
               :enable-time-picker="false"
+              :teleport="true"
               format="MMM d, yyyy"
+              :auto-apply="true"
               placeholder="Select date"
             />
           </div>
@@ -86,7 +121,9 @@ function handleSubmit() {
             <VueDatePicker
               v-model="endDate"
               :enable-time-picker="false"
+              :teleport="true"
               format="MMM d, yyyy"
+              :auto-apply="true"
               placeholder="Select date"
             />
           </div>
@@ -96,18 +133,57 @@ function handleSubmit() {
 
         <div class="field">
           <label>Description</label>
-          <textarea v-model="description" rows="3"></textarea>
+          <textarea
+            v-model="description"
+            rows="3"
+            placeholder="What's this trip about?"
+          ></textarea>
         </div>
+
         <div class="actions">
           <button type="button" class="cancel-btn" @click="$emit('close')">
             Cancel
           </button>
-          <button type="submit" class="submit-btn" :disabled="loading">
-            {{ loading ? "Saving..." : trip ? "Save changes" : "Create trip" }}
+          <button
+            v-if="isEditing"
+            type="submit"
+            class="submit-btn"
+            :disabled="loading"
+          >
+            {{ loading ? "Saving..." : "Save changes" }}
+          </button>
+          <button v-else type="submit" class="submit-btn" :disabled="loading">
+            {{ loading ? "Creating..." : "Next →" }}
           </button>
 
         </div>
       </form>
+
+      <!-- Step 2: Destinations (only when creating) -->
+      <div v-if="step === 2 && !isEditing && createdTrip">
+        <DestinationList :trip="createdTrip" @updated="$emit('updated')" />
+        <div class="actions" style="margin-top: 1.5rem">
+          <button type="button" class="cancel-btn" @click="step = 1">
+            ← Back
+          </button>
+          <button type="button" class="submit-btn" @click="$emit('close')">
+            Done
+          </button>
+        </div>
+      </div>
+
+      <div
+        v-if="step === 2 && !isEditing && !createdTrip"
+        class="creating-state"
+      >
+        <p>Creating your trip...</p>
+      </div>
+
+      <!-- Edit mode: destinations below -->
+      <div v-if="isEditing && trip">
+        <div class="divider"></div>
+        <DestinationList :trip="trip" @updated="$emit('updated')" />
+      </div>
     </div>
   </div>
 </template>
@@ -130,15 +206,75 @@ function handleSubmit() {
   border: 2px solid var(--color-blue);
   padding: 2rem;
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 h2 {
   font-size: 19px;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.step {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.step.active {
+  background: var(--color-blue);
+  color: #ffffff;
+}
+
+.step.done {
+  background: var(--color-orange);
+  color: #ffffff;
+}
+
+.step-line {
+  width: 24px;
+  height: 2px;
+  background: var(--color-border);
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.close-btn:hover {
+  color: var(--color-text);
 }
 
 .row {
@@ -168,6 +304,7 @@ textarea {
   color: var(--color-text);
   font-size: 14px;
   resize: vertical;
+  font-family: var(--font-sans);
 }
 
 textarea:focus {
@@ -212,5 +349,18 @@ textarea:focus {
 
 .submit-btn:disabled {
   opacity: 0.5;
+}
+
+.divider {
+  border: none;
+  border-top: 2px solid var(--color-border);
+  margin: 1.75rem 0;
+}
+
+.creating-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+  font-size: 14px;
 }
 </style>

@@ -5,11 +5,13 @@ import type { Trip } from '../types'
 import AppHeader from '../components/AppHeader.vue'
 import TripCard from '../components/TripCard.vue'
 import TripFormModal from '../components/TripFormModal.vue'
+import TripMap from '../components/TripMap.vue'
 
 const trips = ref<Trip[]>([])
 const loading = ref(true)
 const showModal = ref(false)
 const creating = ref(false)
+const createdTrip = ref<Trip | null>(null)
 
 async function loadTrips() {
   loading.value = true
@@ -20,12 +22,31 @@ async function loadTrips() {
 async function handleCreate(data: any) {
   creating.value = true
   try {
-    await createTrip(data)
-    showModal.value = false
+    const newTrip = await createTrip(data)
+    createdTrip.value = { ...newTrip, destinations: [] }
     await loadTrips()
   } finally {
     creating.value = false
   }
+}
+
+async function handleModalUpdated() {
+  await loadTrips()
+  if (createdTrip.value) {
+    const updated = trips.value.find(t => t.id === createdTrip.value!.id)
+    if (updated) createdTrip.value = updated
+  }
+}
+
+async function handleModalClose() {
+  showModal.value = false
+  createdTrip.value = null
+  await loadTrips()
+}
+
+function openModal() {
+  createdTrip.value = null
+  showModal.value = true
 }
 
 onMounted(loadTrips)
@@ -40,30 +61,36 @@ onMounted(loadTrips)
           <h1>Your trips</h1>
           <p>Plan, track and relive your adventures.</p>
         </div>
-        <button class="new-trip-btn" @click="showModal = true">
+        <button class="new-trip-btn" @click="openModal">
           + New trip
         </button>
       </div>
 
       <div v-if="loading" class="state-message">Loading your trips...</div>
 
-      <div v-else-if="trips.length === 0" class="empty-state">
-        <span class="emoji">🧳</span>
-        <h2>No trips yet</h2>
-        <p>Start planning your first adventure.</p>
-        <button class="new-trip-btn" @click="showModal = true">+ Create your first trip</button>
-      </div>
+      <template v-else>
+        <TripMap :trips="trips" class="map-section" />
 
-      <div v-else class="trips-grid">
-        <TripCard v-for="trip in trips" :key="trip.id" :trip="trip" />
-      </div>
+        <div v-if="trips.length === 0" class="empty-state">
+          <span class="emoji">🧳</span>
+          <h2>No trips yet</h2>
+          <p>Start planning your first adventure.</p>
+          <button class="new-trip-btn" @click="openModal">+ Create your first trip</button>
+        </div>
+
+        <div v-else class="trips-grid">
+          <TripCard v-for="trip in trips" :key="trip.id" :trip="trip" />
+        </div>
+      </template>
     </main>
 
     <TripFormModal
       v-if="showModal"
       :loading="creating"
-      @close="showModal = false"
+      :created-trip="createdTrip"
+      @close="handleModalClose"
       @submit="handleCreate"
+      @updated="handleModalUpdated"
     />
   </div>
 </template>
@@ -102,6 +129,10 @@ h1 {
   border: none;
   border-radius: var(--radius);
   white-space: nowrap;
+}
+
+.map-section {
+  margin-bottom: 2rem;
 }
 
 .state-message {

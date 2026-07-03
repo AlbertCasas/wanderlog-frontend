@@ -4,15 +4,35 @@ export interface User {
   name: string
 }
 
+export interface Destination {
+  id: number
+  trip_id: number
+  name: string
+  date_from: string
+  date_to: string
+  notes?: string
+  order: number
+  latitude?: number
+  longitude?: number
+}
+
 export interface Trip {
   id: number
   title: string
-  destination: string
   start_date: string
   end_date: string
-  description: string
+  description?: string
   user_id: number
-  created_at: string
+  destinations: Destination[]
+}
+
+export interface Expense {
+  id: number
+  trip_id: number
+  title: string
+  amount: number
+  category: string
+  date: string
 }
 
 export interface LoginCredentials {

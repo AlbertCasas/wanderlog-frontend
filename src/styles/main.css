@@ -63,41 +63,64 @@ input, textarea {
   --dp-primary-text-color: #FFFFFF;
   --dp-secondary-color: var(--color-text-secondary);
   --dp-border-color: var(--color-border);
-  --dp-menu-border-color: var(--color-border);
+  --dp-menu-border-color: var(--color-blue);
   --dp-border-color-hover: var(--color-blue);
   --dp-icon-color: var(--color-blue);
+  --dp-border-radius: 14px;
+  --dp-cell-border-radius: 10px;
+  --dp-font-size: 14px;
 }
 
-.dp--input_wrap input.dp--input,
-input.dp--input {
+.dp__input {
   border-radius: var(--radius) !important;
   border: 2px solid var(--color-border) !important;
   background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  font-family: var(--font-sans) !important;
+  font-size: 14px !important;
+  padding: 10px 12px 10px 35px !important;
 }
 
-.dp--menu {
+.dp__input:hover,
+.dp__input_focus {
+  border-color: var(--color-blue) !important;
+}
+
+.dp__menu {
   border-radius: 16px !important;
-  overflow: hidden !important;
   border: 2px solid var(--color-blue) !important;
+  overflow: hidden !important;
+  font-family: var(--font-sans) !important;
 }
 
-.dp--calendar-header-item {
+.dp__calendar_header_item {
   color: var(--color-text-secondary) !important;
   font-weight: 600 !important;
 }
 
-.dp--action-row {
+.dp__action_row {
   background: var(--color-surface) !important;
 }
 
-.dp--action-row button.dp--action-select {
+.dp__action_select {
   background: var(--color-orange) !important;
   border-color: var(--color-orange) !important;
   border-radius: var(--radius) !important;
+  color: #FFFFFF !important;
 }
 
-.dp--action-row button.dp--action-cancel {
+.dp__action_cancel {
   border-radius: var(--radius) !important;
   border-color: var(--color-border-strong) !important;
   color: var(--color-text-secondary) !important;
+}
+
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1 !important;
+}
+
+.leaflet-control {
+  z-index: 2 !important;
 }

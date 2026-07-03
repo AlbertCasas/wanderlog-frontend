@@ -1,5 +1,17 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+if (authStore.isAuthenticated) {
+  router.replace('/trips')
+} else {
+  router.replace('/login')
+}
+</script>
+
 <template>
-  <main>
-    <p>home</p>
-  </main>
+  <div></div>
 </template>

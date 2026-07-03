@@ -11,7 +11,7 @@ export async function getTrip(id: number): Promise<Trip> {
   return response.data
 }
 
-export async function createTrip(data: Partial<Trip>): Promise<Trip> {
+export async function createTrip(data: { title: string; start_date: string; end_date: string; description?: string }): Promise<Trip> {
   const response = await api.post('/trips', data)
   return response.data
 }
