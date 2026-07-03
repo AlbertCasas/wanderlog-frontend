@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import VueDatePicker from "@vuepic/vue-datepicker";
-import DestinationAutocomplete from "./DestinationAutoComplete.vue";
+import DestinationAutocomplete from './DestinationAutocomplete.vue'
 import FormField from "./FormField.vue";
 import type { Trip, Destination } from "../types";
 

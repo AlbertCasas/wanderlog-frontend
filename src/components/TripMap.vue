@@ -86,7 +86,7 @@ onUnmounted(() => {
 <template>
   <div class="map-wrapper">
     <div ref="mapContainer" class="map-container"></div>
-    <p v-if="!trips.some((t) => t.latitude)" class="map-empty">
+    <p v-if="!trips.some((t) => t.destinations.some(d => d.latitude))" class="map-empty">
       No destinations to show yet — create a trip to see it on the map.
     </p>
   </div>
