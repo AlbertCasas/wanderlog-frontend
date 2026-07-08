@@ -25,7 +25,9 @@ api.interceptors.request.use((config) => {
   }
   
   console.log('Request URL:', config.baseURL, config.url)
-  console.log('Full URL:', config.baseURL + config.url)
+  if (config.baseURL && config.url) {
+    console.log('Full URL:', config.baseURL + config.url)
+  }
   
   const token = localStorage.getItem('token')
   if (token) {
