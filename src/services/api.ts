@@ -1,18 +1,21 @@
 // production build
 import axios from 'axios'
 
-// HARDCODED HTTPS for Railway - environment variable seems to be causing issues
-const baseURL = 'https://wanderlog-backend-production.up.railway.app/api'
+// Export the base URL as a constant
+export const API_BASE_URL = 'https://wanderlog-backend-production.up.railway.app/api'
 
-console.log('API URL (hardcoded HTTPS):', baseURL)
+console.log('API Base URL:', API_BASE_URL)
 
-const api = axios.create({ 
-  baseURL
-})
+// Create axios instance WITHOUT baseURL to avoid any protocol issues
+const api = axios.create({})
 
 api.interceptors.request.use((config) => {
-  console.log('Request config.baseURL:', config.baseURL)
-  console.log('Request config.url:', config.url)
+  // If the URL is relative, prepend the base URL manually
+  if (config.url && !config.url.startsWith('http')) {
+    config.url = API_BASE_URL + config.url
+  }
+  
+  console.log('Final request URL:', config.url)
   
   const token = localStorage.getItem('token')
   if (token) {
@@ -20,7 +23,16 @@ api.interceptors.request.use((config) => {
   }
   return config
 })
-
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error)
+    if (error.config) {
+      console.error('Failed request URL:', error.config.url)
+    }
+    return Promise.reject(error)
+  }
+)
 // Add response interceptor to catch any issues
 api.interceptors.response.use(
   (response) => {
